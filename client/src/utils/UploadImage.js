@@ -1,20 +1,25 @@
 import Axios from '../utils/Axios'
 import SummaryApi from '../common/SummaryApi'
 
-const uploadImage = async(image)=>{
+const uploadImage = async (image) => {
     try {
-        const formData = new FormData()
-        formData.append('image',image)
+        const formData = new FormData();
+        formData.append('image', image);
 
         const response = await Axios({
             ...SummaryApi.uploadImage,
-            data : formData
-        })
+            data: formData,
+            headers: {
+                'Content-Type': 'multipart/form-data', // Important!
+                ...(SummaryApi.uploadImage.headers || {}),
+            }
+        });
 
-        return response
+        return response.data; // returning only the data part
     } catch (error) {
-        return error
+        console.error('Image upload failed:', error);
+        throw error.response?.data || error.message || error; // better error throwing
     }
-}
+};
 
-export default uploadImage
+export default uploadImage;

@@ -2,6 +2,8 @@ import CategoryModel from "../models/category.model.js";
 import SubCategoryModel from "../models/subCategory.model.js";
 import ProductModel from "../models/product.model.js";
 
+
+
 export const AddCategoryController = async (request, response) => {
     try {
         const { name, image } = request.body;
@@ -9,10 +11,21 @@ export const AddCategoryController = async (request, response) => {
         // Validate required fields
         if (!name || !image) {
             return response.status(400).json({
-                message: "Name and image are required fields",
+                message: "Name and image are required fields.",
                 success: false,
                 error: true,
-                data: null
+                data: null,
+            });
+        }
+
+        // Check if category with same name already exists (optional but good practice)
+        const existingCategory = await CategoryModel.findOne({ name });
+        if (existingCategory) {
+            return response.status(409).json({
+                message: "Category with this name already exists.",
+                success: false,
+                error: true,
+                data: null,
             });
         }
 
@@ -22,19 +35,19 @@ export const AddCategoryController = async (request, response) => {
 
         // Send success response
         return response.status(201).json({
-            message: "Category added successfully",
+            message: "Category added successfully.",
             success: true,
             error: false,
-            data: savedCategory
+            data: savedCategory,
         });
 
     } catch (error) {
-        // Handle unexpected errors
+        console.error('Error in AddCategoryController:', error); // Optional logging
         return response.status(500).json({
-            message: error.message || "An unexpected error occurred",
+            message: error.message || "An unexpected error occurred.",
             success: false,
             error: true,
-            data: null
+            data: null,
         });
     }
 };

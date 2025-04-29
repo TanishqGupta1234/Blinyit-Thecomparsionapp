@@ -1,24 +1,28 @@
 import mongoose from "mongoose";
 
 const subCategorySchema = new mongoose.Schema({
-    name : {
-        type : String,
-        default : ""
+    name: {
+        type: String,
+        required: [true, "Subcategory name is required"],
+        trim: true,
+        unique: true
     },
-    image : {
-        type : String,
-        default : ""
+    image: {
+        type: String,
+        required: [true, "Subcategory image is required"]
     },
-    category : [
+    category: [
         {
-            type : mongoose.Schema.ObjectId,
-            ref : "category"
+            type: mongoose.Schema.Types.ObjectId,  // Corrected from Schema.ObjectId
+            ref: "Category",  // Should match the model name exactly (case-sensitive)
+            required: [true, "Category reference is required"]
         }
     ]
-},{
-    timestamps : true
-})
+}, {
+    timestamps: true
+});
 
-const SubCategoryModel = mongoose.model('subCategory',subCategorySchema)
+// Model name should be singular and capitalized (convention)
+const SubCategory = mongoose.model('SubCategory', subCategorySchema);
 
-export default SubCategoryModel
+export default SubCategory;

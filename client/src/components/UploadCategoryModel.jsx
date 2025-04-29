@@ -51,31 +51,40 @@ const UploadCategoryModal = ({ close, fetchData }) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    // Validate file type (optional: you can add more file types if needed)
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please upload a valid image');
+      return;
+    }
+
     try {
       const response = await uploadImage(file);
       const { data: imageResponse } = response || {};
-      if (imageResponse?.data?.url) {
-        setData((prev) => ({ ...prev, image: imageResponse.data.url }));
+      console.log(response);
+      if (imageResponse?.url) {
+        setData((prev) => ({ ...prev, image: imageResponse?.url }));
         toast.success('Image uploaded successfully');
       } else {
         toast.error('Image upload failed');
       }
     } catch (error) {
+      console.error('Image upload error:', error);
       toast.error('Image upload failed');
     }
   };
 
   return (
-    <section className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-neutral-800 bg-opacity-60">
-      <div className="w-full max-w-2xl p-6 bg-white rounded shadow-lg">
+    <section className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50">
+      <div className="w-full max-w-2xl p-6 bg-white rounded-lg shadow-xl">
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-lg font-semibold">Add New Category</h1>
-          <button onClick={close} className="text-neutral-700 hover:text-neutral-900">
-            <IoClose size={25} />
+          <h1 className="text-xl font-semibold text-gray-800">Add New Category</h1>
+          <button onClick={close} className="text-gray-600 hover:text-gray-900">
+            <IoClose size={24} />
           </button>
         </div>
 
         <form className="grid gap-6" onSubmit={handleSubmit}>
+          {/* Category Name */}
           <div className="grid gap-2">
             <label htmlFor="categoryName" className="text-sm font-medium text-gray-700">
               Name
@@ -87,14 +96,15 @@ const UploadCategoryModal = ({ close, fetchData }) => {
               placeholder="Enter category name"
               value={data.name}
               onChange={handleOnChange}
-              className="p-2 border rounded bg-blue-50 border-blue-100 focus:border-primary-200 outline-none"
+              className="p-2 border rounded bg-blue-50 border-blue-200 focus:border-blue-400 outline-none"
             />
           </div>
 
+          {/* Category Image */}
           <div className="grid gap-2">
             <label className="text-sm font-medium text-gray-700">Image</label>
             <div className="flex flex-col items-center gap-4 lg:flex-row">
-              <div className="w-full h-36 lg:w-36 bg-blue-50 border flex items-center justify-center rounded overflow-hidden">
+              <div className="w-full h-36 lg:w-36 bg-blue-50 border border-blue-200 flex items-center justify-center rounded overflow-hidden">
                 {data.image ? (
                   <img
                     src={data.image}
@@ -106,12 +116,12 @@ const UploadCategoryModal = ({ close, fetchData }) => {
                 )}
               </div>
 
-              <label htmlFor="uploadCategoryImage" className="cursor-pointer">
+              <label htmlFor="uploadCategoryImage" className="cursor-pointer w-full lg:w-auto">
                 <div
-                  className={`px-4 py-2 rounded border font-medium transition ${
+                  className={`px-4 py-2 rounded border text-center font-medium transition ${
                     data.name
-                      ? 'border-primary-200 hover:bg-primary-100'
-                      : 'bg-gray-300 cursor-not-allowed'
+                      ? 'border-blue-400 text-blue-600 hover:bg-blue-100'
+                      : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                   }`}
                 >
                   Upload Image
@@ -127,12 +137,13 @@ const UploadCategoryModal = ({ close, fetchData }) => {
             </div>
           </div>
 
+          {/* Submit Button */}
           <button
             type="submit"
             disabled={!data.name || !data.image || loading}
             className={`py-2 font-semibold rounded text-white transition ${
               data.name && data.image && !loading
-                ? 'bg-primary-200 hover:bg-primary-100'
+                ? 'bg-blue-600 hover:bg-blue-700'
                 : 'bg-gray-300 cursor-not-allowed'
             }`}
           >
