@@ -6,54 +6,39 @@ export const AddCategoryController = async (request, response) => {
     try {
         const { name, image } = request.body;
 
-        // Ensure both name and image are provided
-        if (!name) {
+        // Validate required fields
+        if (!name || !image) {
             return response.status(400).json({
                 message: "Name and image are required fields",
                 success: false,
                 error: true,
-                data: null  // Ensure 'data' is present in the response
+                data: null
             });
         }
 
-        // Optionally, validate the image format or size here if needed
-        // Example: Check if the image is a valid URL or base64 format
-        // if (!isValidImage(image)) {
-        //     return response.status(400).json({
-        //         message: "Invalid image format",
-        //         success: false,
-        //         error: true,
-        //         data: null
-        //     });
-        // }
+        // Create and save the new category
+        const newCategory = new CategoryModel({ name, image });
+        const savedCategory = await newCategory.save();
 
-        // Create a new category document
-        const addCategory = new CategoryModel({
-            name,
-        });
-
-        // Save the new category to the database
-        const saveCategory = await addCategory.save();
-
-        // Return success response if category was saved successfully
+        // Send success response
         return response.status(201).json({
             message: "Category added successfully",
-            data: saveCategory, // Ensure this is correctly returned
             success: true,
-            error: false
+            error: false,
+            data: savedCategory
         });
 
     } catch (error) {
-        // Catch any unexpected errors
-        console.error(error); // Log the error for server-side debugging
+        // Handle unexpected errors
         return response.status(500).json({
             message: error.message || "An unexpected error occurred",
             success: false,
             error: true,
-            data: null // Ensure 'data' is present here as well
+            data: null
         });
     }
 };
+
 
 
 export const getCategoryController = async(request,response)=>{
