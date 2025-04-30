@@ -135,7 +135,6 @@ const Header = () => {
                                                     cartItem[0] ? (
                                                         <div>
                                                             <p>{totalQty} Items</p>
-                                                            <p>{DisplayPriceInRupees(totalPrice)}</p>
                                                         </div>
                                                     ) : (
                                                         <p>My Cart</p>
