@@ -6,7 +6,7 @@ import { DisplayPriceInRupees } from '../utils/DisplayPriceInRupees'
 import { FaCaretRight } from "react-icons/fa"
 import { useSelector } from 'react-redux'
 import AddToCartButton from './AddToCartButton'
-import { getComparisonPrices, getDeliveryAndHandlingCharges } from '../utils/getComparisonPrices'
+import { getComparisonPrices } from '../utils/getComparisonPrices'
 import imageEmpty from '../assets/empty_cart.webp'
 import toast from 'react-hot-toast'
 
@@ -16,45 +16,12 @@ const DisplayCartItem = ({ close }) => {
     const user = useSelector(state => state.user)
     const navigate = useNavigate()
 
-    const redirectToCheckoutPage = () => {
-        if (user?._id) {
-            navigate("/checkout")
-            if (close) {
-                close()
-            }
-            return
-        }
-        toast("Please Login")
-    }
-
     const redirectToCartPage = () => {
-        navigate("/cart") // Redirect to the new cart page
+        navigate("/cart")
         if (close) {
             close()
         }
     }
-
-    // Calculate prices and charges for each cart
-    const calculateCartTotals = (cart) => {
-        let blinkitTotal = 0
-        let zeptoTotal = 0
-        let instamartTotal = 0
-
-        cart.forEach(item => {
-            const { blinkit, zepto, instamart } = getComparisonPrices(item?.productId?.price)
-            const blinkitCharges = getDeliveryAndHandlingCharges("blinkit")
-            const zeptoCharges = getDeliveryAndHandlingCharges("zepto")
-            const instamartCharges = getDeliveryAndHandlingCharges("instamart")
-
-            blinkitTotal += blinkit + blinkitCharges.delivery + blinkitCharges.handling
-            zeptoTotal += zepto + zeptoCharges.delivery + zeptoCharges.handling
-            instamartTotal += instamart + instamartCharges.delivery + instamartCharges.handling
-        })
-
-        return { blinkitTotal, zeptoTotal, instamartTotal }
-    }
-
-    const { blinkitTotal, zeptoTotal, instamartTotal } = calculateCartTotals(cartItem)
 
     return (
         <section className='bg-neutral-900 fixed top-0 bottom-0 right-0 left-0 bg-opacity-70 z-50'>
@@ -70,16 +37,14 @@ const DisplayCartItem = ({ close }) => {
                 </div>
 
                 <div className='min-h-[75vh] lg:min-h-[80vh] h-full max-h-[calc(100vh-150px)] bg-blue-50 p-4 flex flex-col gap-6 overflow-auto'>
-                    {/*** Display items in three separate carts ***/}
                     {cartItem.length > 0 ? (
                         <>
                             {/* Blinkit Cart */}
                             <div className='bg-white rounded-lg p-4 shadow-md'>
                                 <h3 className='font-semibold text-lg text-yellow-600'>Blinkit Cart</h3>
                                 <div className='grid gap-4 mt-4'>
-                                    {cartItem.map((item, index) => {
+                                    {cartItem.map((item) => {
                                         const { blinkit } = getComparisonPrices(item?.productId?.price)
-                                        const blinkitCharges = getDeliveryAndHandlingCharges("blinkit")
                                         return (
                                             <div key={item?._id + "blinkitCart"} className='flex items-center gap-4'>
                                                 <div className='w-16 h-16 min-h-16 min-w-16 bg-gray-200 border rounded'>
@@ -92,17 +57,11 @@ const DisplayCartItem = ({ close }) => {
                                                     <p className='text-sm font-medium'>{item?.productId?.name}</p>
                                                     <p className='text-neutral-400 text-xs'>{item?.productId?.unit}</p>
                                                     <p className='font-semibold'>{DisplayPriceInRupees(blinkit)}</p>
-                                                    <p className='text-xs text-gray-500'>
-                                                        Delivery: {DisplayPriceInRupees(blinkitCharges.delivery)}, Handling: {DisplayPriceInRupees(blinkitCharges.handling)}
-                                                    </p>
                                                 </div>
                                                 <AddToCartButton data={item?.productId} />
                                             </div>
                                         )
                                     })}
-                                </div>
-                                <div className='mt-4 font-semibold text-right'>
-                                    Total: {DisplayPriceInRupees(blinkitTotal)}
                                 </div>
                             </div>
 
@@ -110,9 +69,8 @@ const DisplayCartItem = ({ close }) => {
                             <div className='bg-white rounded-lg p-4 shadow-md'>
                                 <h3 className='font-semibold text-lg text-green-600'>Zepto Cart</h3>
                                 <div className='grid gap-4 mt-4'>
-                                    {cartItem.map((item, index) => {
+                                    {cartItem.map((item) => {
                                         const { zepto } = getComparisonPrices(item?.productId?.price)
-                                        const zeptoCharges = getDeliveryAndHandlingCharges("zepto")
                                         return (
                                             <div key={item?._id + "zeptoCart"} className='flex items-center gap-4'>
                                                 <div className='w-16 h-16 min-h-16 min-w-16 bg-gray-200 border rounded'>
@@ -125,17 +83,11 @@ const DisplayCartItem = ({ close }) => {
                                                     <p className='text-sm font-medium'>{item?.productId?.name}</p>
                                                     <p className='text-neutral-400 text-xs'>{item?.productId?.unit}</p>
                                                     <p className='font-semibold'>{DisplayPriceInRupees(zepto)}</p>
-                                                    <p className='text-xs text-gray-500'>
-                                                        Delivery: {DisplayPriceInRupees(zeptoCharges.delivery)}, Handling: {DisplayPriceInRupees(zeptoCharges.handling)}
-                                                    </p>
                                                 </div>
                                                 <AddToCartButton data={item?.productId} />
                                             </div>
                                         )
                                     })}
-                                </div>
-                                <div className='mt-4 font-semibold text-right'>
-                                    Total: {DisplayPriceInRupees(zeptoTotal)}
                                 </div>
                             </div>
 
@@ -143,9 +95,8 @@ const DisplayCartItem = ({ close }) => {
                             <div className='bg-white rounded-lg p-4 shadow-md'>
                                 <h3 className='font-semibold text-lg text-blue-600'>Instamart Cart</h3>
                                 <div className='grid gap-4 mt-4'>
-                                    {cartItem.map((item, index) => {
+                                    {cartItem.map((item) => {
                                         const { instamart } = getComparisonPrices(item?.productId?.price)
-                                        const instamartCharges = getDeliveryAndHandlingCharges("instamart")
                                         return (
                                             <div key={item?._id + "instamartCart"} className='flex items-center gap-4'>
                                                 <div className='w-16 h-16 min-h-16 min-w-16 bg-gray-200 border rounded'>
@@ -158,17 +109,11 @@ const DisplayCartItem = ({ close }) => {
                                                     <p className='text-sm font-medium'>{item?.productId?.name}</p>
                                                     <p className='text-neutral-400 text-xs'>{item?.productId?.unit}</p>
                                                     <p className='font-semibold'>{DisplayPriceInRupees(instamart)}</p>
-                                                    <p className='text-xs text-gray-500'>
-                                                        Delivery: {DisplayPriceInRupees(instamartCharges.delivery)}, Handling: {DisplayPriceInRupees(instamartCharges.handling)}
-                                                    </p>
                                                 </div>
                                                 <AddToCartButton data={item?.productId} />
                                             </div>
                                         )
                                     })}
-                                </div>
-                                <div className='mt-4 font-semibold text-right'>
-                                    Total: {DisplayPriceInRupees(instamartTotal)}
                                 </div>
                             </div>
                         </>
