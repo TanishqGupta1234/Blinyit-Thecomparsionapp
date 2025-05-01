@@ -6,29 +6,26 @@ import { DisplayPriceInRupees } from '../utils/DisplayPriceInRupees'
 const CartPage = () => {
     const cartItem = useSelector(state => state.cartItem.cart)
 
-    // Calculate totals for each cart
-    const calculateCartTotals = (cart) => {
-        let blinkitTotal = 0
-        let zeptoTotal = 0
-        let instamartTotal = 0
+    // Helper to sum item prices for a given store
+    const getStoreSubtotal = (cart, store) =>
+        cart.reduce((sum, item) => {
+            const prices = getComparisonPrices(item?.productId?.price)
+            return sum + prices[store]
+        }, 0)
 
-        cart.forEach(item => {
-            const { blinkit, zepto, instamart } = getComparisonPrices(item?.productId?.price)
-            const blinkitCharges = getDeliveryAndHandlingCharges("blinkit")
-            const zeptoCharges = getDeliveryAndHandlingCharges("zepto")
-            const instamartCharges = getDeliveryAndHandlingCharges("instamart")
+    // Get one set of charges per cart (randomized, but only once per cart)
+    const blinkitCharges = getDeliveryAndHandlingCharges("blinkit", 0)
+    const zeptoCharges = getDeliveryAndHandlingCharges("zepto", 1)
+    const instamartCharges = getDeliveryAndHandlingCharges("instamart", 2)
 
-            blinkitTotal += blinkit + blinkitCharges.delivery + blinkitCharges.handling
-            zeptoTotal += zepto + zeptoCharges.delivery + zeptoCharges.handling
-            instamartTotal += instamart + instamartCharges.delivery + instamartCharges.handling
-        })
+    const blinkitSubtotal = getStoreSubtotal(cartItem, "blinkit")
+    const zeptoSubtotal = getStoreSubtotal(cartItem, "zepto")
+    const instamartSubtotal = getStoreSubtotal(cartItem, "instamart")
 
-        return { blinkitTotal, zeptoTotal, instamartTotal }
-    }
+    const blinkitTotal = blinkitSubtotal + blinkitCharges.delivery + blinkitCharges.handling
+    const zeptoTotal = zeptoSubtotal + zeptoCharges.delivery + zeptoCharges.handling
+    const instamartTotal = instamartSubtotal + instamartCharges.delivery + instamartCharges.handling
 
-    const { blinkitTotal, zeptoTotal, instamartTotal } = calculateCartTotals(cartItem)
-
-    // Store URLs
     const storeUrls = {
         blinkit: 'https://blinkit.com',
         zepto: 'https://www.zeptonow.com',
@@ -43,20 +40,36 @@ const CartPage = () => {
                 <div className="bg-white rounded-lg shadow-md p-6">
                     <h2 className="text-xl font-semibold text-yellow-600 mb-4">Blinkit Cart</h2>
                     <div className="space-y-4">
-                        {cartItem.map((item, index) => {
+                        {cartItem.map((item) => {
                             const { blinkit } = getComparisonPrices(item?.productId?.price)
-                            const blinkitCharges = getDeliveryAndHandlingCharges("blinkit", index)
                             return (
-                                <div key={item?._id + "blinkitCart"} className="flex items-center justify-between">
-                                    <p className="text-sm font-medium">{item?.productId?.name}</p>
-                                    <p className="font-semibold">{DisplayPriceInRupees(blinkit)}</p>
+                                <div key={item?._id + "blinkitCart"} className="border-b pb-2 mb-2">
+                                    <div className="flex items-center justify-between">
+                                        <p className="text-sm font-medium">{item?.productId?.name}</p>
+                                        <p className="font-semibold">{DisplayPriceInRupees(blinkit)}</p>
+                                    </div>
                                 </div>
                             )
                         })}
                     </div>
-                    <p className="mt-4 font-semibold text-right">
-                        Total Price (Including Shipping and Platform Charges): {DisplayPriceInRupees(blinkitTotal)}
-                    </p>
+                    <div className="mt-4 text-sm">
+                        <div className="flex justify-between">
+                            <span>Subtotal</span>
+                            <span>{DisplayPriceInRupees(blinkitSubtotal)}</span>
+                        </div>
+                        <div className="flex justify-between">
+                            <span>Shipping</span>
+                            <span>{DisplayPriceInRupees(blinkitCharges.delivery)}</span>
+                        </div>
+                        <div className="flex justify-between">
+                            <span>Handling</span>
+                            <span>{DisplayPriceInRupees(blinkitCharges.handling)}</span>
+                        </div>
+                        <div className="flex justify-between font-semibold border-t pt-2 mt-2">
+                            <span>Total</span>
+                            <span>{DisplayPriceInRupees(blinkitTotal)}</span>
+                        </div>
+                    </div>
                     <button
                         onClick={() => window.open(storeUrls.blinkit, '_blank')}
                         className="mt-4 bg-yellow-500 text-white px-4 py-2 rounded shadow hover:bg-yellow-600 w-full"
@@ -69,20 +82,36 @@ const CartPage = () => {
                 <div className="bg-white rounded-lg shadow-md p-6">
                     <h2 className="text-xl font-semibold text-green-600 mb-4">Zepto Cart</h2>
                     <div className="space-y-4">
-                        {cartItem.map((item, index) => {
+                        {cartItem.map((item) => {
                             const { zepto } = getComparisonPrices(item?.productId?.price)
-                            const zeptoCharges = getDeliveryAndHandlingCharges("zepto", index)
                             return (
-                                <div key={item?._id + "zeptoCart"} className="flex items-center justify-between">
-                                    <p className="text-sm font-medium">{item?.productId?.name}</p>
-                                    <p className="font-semibold">{DisplayPriceInRupees(zepto)}</p>
+                                <div key={item?._id + "zeptoCart"} className="border-b pb-2 mb-2">
+                                    <div className="flex items-center justify-between">
+                                        <p className="text-sm font-medium">{item?.productId?.name}</p>
+                                        <p className="font-semibold">{DisplayPriceInRupees(zepto)}</p>
+                                    </div>
                                 </div>
                             )
                         })}
                     </div>
-                    <p className="mt-4 font-semibold text-right">
-                        Total Price (Including Shipping and Platform Charges): {DisplayPriceInRupees(zeptoTotal)}
-                    </p>
+                    <div className="mt-4 text-sm">
+                        <div className="flex justify-between">
+                            <span>Subtotal</span>
+                            <span>{DisplayPriceInRupees(zeptoSubtotal)}</span>
+                        </div>
+                        <div className="flex justify-between">
+                            <span>Shipping</span>
+                            <span>{DisplayPriceInRupees(zeptoCharges.delivery)}</span>
+                        </div>
+                        <div className="flex justify-between">
+                            <span>Handling</span>
+                            <span>{DisplayPriceInRupees(zeptoCharges.handling)}</span>
+                        </div>
+                        <div className="flex justify-between font-semibold border-t pt-2 mt-2">
+                            <span>Total</span>
+                            <span>{DisplayPriceInRupees(zeptoTotal)}</span>
+                        </div>
+                    </div>
                     <button
                         onClick={() => window.open(storeUrls.zepto, '_blank')}
                         className="mt-4 bg-green-500 text-white px-4 py-2 rounded shadow hover:bg-green-600 w-full"
@@ -95,20 +124,36 @@ const CartPage = () => {
                 <div className="bg-white rounded-lg shadow-md p-6">
                     <h2 className="text-xl font-semibold text-blue-600 mb-4">Instamart Cart</h2>
                     <div className="space-y-4">
-                        {cartItem.map((item, index) => {
+                        {cartItem.map((item) => {
                             const { instamart } = getComparisonPrices(item?.productId?.price)
-                            const instamartCharges = getDeliveryAndHandlingCharges("instamart", index)
                             return (
-                                <div key={item?._id + "instamartCart"} className="flex items-center justify-between">
-                                    <p className="text-sm font-medium">{item?.productId?.name}</p>
-                                    <p className="font-semibold">{DisplayPriceInRupees(instamart)}</p>
+                                <div key={item?._id + "instamartCart"} className="border-b pb-2 mb-2">
+                                    <div className="flex items-center justify-between">
+                                        <p className="text-sm font-medium">{item?.productId?.name}</p>
+                                        <p className="font-semibold">{DisplayPriceInRupees(instamart)}</p>
+                                    </div>
                                 </div>
                             )
                         })}
                     </div>
-                    <p className="mt-4 font-semibold text-right">
-                        Total Price (Including Shipping and Platform Charges): {DisplayPriceInRupees(instamartTotal)}
-                    </p>
+                    <div className="mt-4 text-sm">
+                        <div className="flex justify-between">
+                            <span>Subtotal</span>
+                            <span>{DisplayPriceInRupees(instamartSubtotal)}</span>
+                        </div>
+                        <div className="flex justify-between">
+                            <span>Shipping</span>
+                            <span>{DisplayPriceInRupees(instamartCharges.delivery)}</span>
+                        </div>
+                        <div className="flex justify-between">
+                            <span>Handling</span>
+                            <span>{DisplayPriceInRupees(instamartCharges.handling)}</span>
+                        </div>
+                        <div className="flex justify-between font-semibold border-t pt-2 mt-2">
+                            <span>Total</span>
+                            <span>{DisplayPriceInRupees(instamartTotal)}</span>
+                        </div>
+                    </div>
                     <button
                         onClick={() => window.open(storeUrls.instamart, '_blank')}
                         className="mt-4 bg-blue-500 text-white px-4 py-2 rounded shadow hover:bg-blue-600 w-full"
