@@ -23,6 +23,7 @@ import CartMobile from "../pages/CartMobile";
 import CheckoutPage from "../pages/CheckoutPage";
 import Success from "../pages/Success";
 import Cancel from "../pages/Cancel";
+import CartPage from "../pages/CartPage"; // Import the new cart page
 
 const router = createBrowserRouter([
     {
@@ -110,7 +111,7 @@ const router = createBrowserRouter([
             },
             {
                 path : 'cart',
-                element : <CartMobile/>
+                element : <CartPage/> // Added new cart page route
             },
             {
                 path : "checkout",
